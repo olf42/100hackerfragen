@@ -8,7 +8,8 @@ def setup_db():
     c.execute('''
         CREATE TABLE fragen (
             id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            frage TEXT)''')
+            frage TEXT,
+            downvotes INTEGER)''')
     c.execute('''
         CREATE TABLE antworten (
             id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -34,9 +35,16 @@ def db(func):
 def add_frage(c, frage):
     c.execute('INSERT INTO fragen (frage) VALUES (?)', (frage,))
 
+@db
+def add_downvote(c, frage_id):
+    c.execute('UPDATE fragen SET downvotes=(SELECT downvotes+1 FROM fragen WHERE id=(?)) WHERE id=(?)', (frage_id, frage_id))
 
 @db
 def add_antwort(c, frage_id, antwort):
+    c.execute('SELECT downvotes FROM fragen WHERE id=(?)', (frage_id,))
+    res = c.fetchone()
+    if res[0] > 0:
+        c.execute('UPDATE fragen SET downvotes=(SELECT downvotes-1 FROM fragen WHERE id=(?)) WHERE id=(?)', (frage_id, frage_id))
     c.execute('INSERT INTO antworten (frage_id, antwort) VALUES (?, ?)',
                 (frage_id, antwort))
 
@@ -47,17 +55,17 @@ def get_frage(c):
                 SELECT 
                     fragen.id,
                     fragen.frage, 
+                    fragen.downvotes as downvotes,
                     count(antworten.id) AS num_antworten 
                 FROM fragen
                 LEFT JOIN antworten ON antworten.frage_id=fragen.id 
                 GROUP BY fragen.id)
-            WHERE num_antworten < 100'''
-
+            WHERE num_antworten < 100 AND downvotes < 3'''
     c.execute(q)
     res = c.fetchall()
-    if res is None:
+    if not res:
         return
-    id, fr, num = random.choice(res)
+    id, fr, dv, num = random.choice(res)
     return dict(id=id, frage=fr, num=num)
 
 
