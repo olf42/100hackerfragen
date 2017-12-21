@@ -1,0 +1,25 @@
+body {
+    padding-top: 54px;
+    background-color: rgb(255,51,255);
+    color: white;
+}
+
+@media (min-width: 992px) {
+	body {
+		padding-top: 56px;
+    }
+}
+    
+.navbar-brand {
+	font-family: 'hwo';
+	font-size: 30px;
+}
+
+.lead {
+	font-size: 40px;
+}
+
+h1 {
+	font-family: 'hwo';
+	font-size: 70px;
+}
