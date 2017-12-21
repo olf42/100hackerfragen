@@ -33,7 +33,7 @@ def db(func):
 
 @db
 def add_frage(c, frage):
-    c.execute('INSERT INTO fragen (frage) VALUES (?)', (frage,))
+    c.execute('INSERT INTO fragen (frage, downvotes) VALUES (?, 0)', (frage,))
 
 @db
 def add_downvote(c, frage_id):
