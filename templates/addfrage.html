@@ -22,7 +22,7 @@
         <div class="collapse navbar-collapse" id="navbarResponsive">
           <ul class="navbar-nav ml-auto">
             <li class="nav-item active">
-              <a class="nav-link" href="/100hf">Fragen beantworten
+              <a class="nav-link" href="{{approot}}">Fragen beantworten
               </a>
             </li>
             <li class="nav-item">
@@ -45,7 +45,7 @@
           </div>
           {% endif %}
           <h1 class="mt-5">100 Hacker*innen haben wir gefragt...</h1>
-	      <form action="/100hf/add" method="get">
+	      <form action="{{approot}}add" method="get">
 			  <div class="form-group">
 			    <input name="question" type="text" class="form-control" id="frage" placeholder="..." autofocus>
 			  </div>

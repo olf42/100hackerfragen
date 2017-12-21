@@ -1,4 +1,5 @@
 import sqlite3
+import random
 
 
 def setup_db():
@@ -49,16 +50,14 @@ def get_frage(c):
                     count(antworten.id) AS num_antworten 
                 FROM fragen
                 LEFT JOIN antworten ON antworten.frage_id=fragen.id 
-                GROUP BY fragen.id 
-                ORDER BY num_antworten) 
-            WHERE num_antworten < 100
-            LIMIT 1'''
+                GROUP BY fragen.id)
+            WHERE num_antworten < 100'''
 
     c.execute(q)
-    res = c.fetchone()
+    res = c.fetchall()
     if res is None:
         return
-    id, fr, num = res
+    id, fr, num = random.choice(res)
     return dict(id=id, frage=fr, num=num)
 
 

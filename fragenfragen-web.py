@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, make_response
 from manage import get_frage, add_antwort, add_frage
+from config import APPROOT
 
 app = Flask("100hackerfragen-on-the-web")
 
@@ -33,10 +34,31 @@ def to_dict(args):
 
 @app.route('/')
 def index():
+	hfq = request.cookies.get('1hfq', '')
 	data = to_dict(request.args)
+	answered_id = None
 	if 'answer' in data.keys() and 'frage_id' in data.keys():
-		add_antwort(data['frage_id'], data['answer'])
-	return render_template('index.html', frage=get_frage())
+		answered_id = data['frage_id']
+		add_antwort(answered_id, data['answer'])
+	tries = 0
+	while True:
+		tries += 1
+		frage = get_frage()
+		if '"{}"'.format(frage['id']) not in hfq and str(frage['id']) != answered_id:
+			no_more_questions = False
+			break
+		if tries == 100:
+			no_more_questions = True
+			break
+	resp = make_response(render_template(
+		'index.html', 
+		frage=frage, 
+		no_more_questions=no_more_questions, 
+		approot=APPROOT))
+	if answered_id:
+		hfq = '{},"{}"'.format(hfq, answered_id)
+		resp.set_cookie('1hfq', hfq)
+	return resp
 
 
 @app.route('/add')
@@ -46,4 +68,4 @@ def add():
 	if 'question' in data.keys():
 		add_frage(data['question'])
 		submitted = True
-	return render_template('addfrage.html', submitted=submitted)
+	return render_template('addfrage.html', submitted=submitted, approot=APPROOT)
