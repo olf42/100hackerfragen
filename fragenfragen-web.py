@@ -39,7 +39,8 @@ def index():
 	answered_id = None
 	if 'answer' in data.keys() and 'frage_id' in data.keys():
 		answered_id = data['frage_id']
-		add_antwort(answered_id, data['answer'])
+		if not(data['answer'].strip() == '' or 'nope' in data.keys()):
+			add_antwort(answered_id, data['answer'])
 	tries = 0
 	while True:
 		tries += 1

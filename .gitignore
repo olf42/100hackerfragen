@@ -4,3 +4,5 @@ lib
 local
 __pycache__
 share
+config.py
+100hackerfragen.db
