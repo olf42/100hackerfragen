@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, make_response
-from manage import get_frage, add_antwort, add_frage, add_downvote
+from manage import get_frage, add_antwort, add_frage, add_downvote, get_frage_by_id
 from config import APPROOT
 
 app = Flask("100hackerfragen-on-the-web")
@@ -42,6 +42,7 @@ def index():
 		answered_id = data['frage_id']
 		if not(data['answer'].strip() == '' or 'nope' in data.keys() or 'shit' in data.keys()):
 			add_antwort(answered_id, data['answer'])
+			print('{} - {}'.format(get_frage_by_id(answered_id), data['answer']))
 		if 'shit' in data.keys():
 			add_downvote(answered_id)
 		already_asked_ids.append(answered_id)

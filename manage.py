@@ -73,6 +73,14 @@ def get_frage(c, already_asked_ids):
 
 
 @db
+def get_frage_by_id(c, id):
+    c.execute("SELECT frage FROM fragen WHERE id=(?)", (id,))
+    res = c.fetchone()
+    if res:
+        return res[0]
+    return
+
+@db
 def get_antworten(c, frage_id):
     q = '''SELECT antwort from antworten WHERE frage_id=(?)'''
     c.execute(q, (frage_id,))
