@@ -35,6 +35,7 @@ def to_dict(args):
 @app.route('/')
 def index():
 	hfq = request.cookies.get('1hfq', '')
+	already_asked_ids = [int(i.replace('"', '')) for i in hfq.split(',') if i]
 	data = to_dict(request.args)
 	answered_id = None
 	if 'answer' in data.keys() and 'frage_id' in data.keys():
@@ -43,16 +44,11 @@ def index():
 			add_antwort(answered_id, data['answer'])
 		if 'shit' in data.keys():
 			add_downvote(answered_id)
-	tries = 0
-	while True:
-		tries += 1
-		frage = get_frage()
-		if frage is not None and '"{}"'.format(frage['id']) not in hfq and str(frage['id']) != answered_id:
-			no_more_questions = False
-			break
-		if tries == 100 or frage is None:
-			no_more_questions = True
-			break
+		already_asked_ids.append(answered_id)
+	frage = get_frage(already_asked_ids)
+	no_more_questions = False
+	if frage is None:
+		no_more_questions = True
 	resp = make_response(render_template(
 		'index.html', 
 		frage=frage, 

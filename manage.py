@@ -49,7 +49,7 @@ def add_antwort(c, frage_id, antwort):
                 (frage_id, antwort))
 
 @db
-def get_frage(c):
+def get_frage(c, already_asked_ids):
     """Returns frage with least answers, return None if there are no fragen with < 100 answers"""
     q = '''SELECT * from (
                 SELECT 
@@ -60,14 +60,16 @@ def get_frage(c):
                 FROM fragen
                 LEFT JOIN antworten ON antworten.frage_id=fragen.id 
                 GROUP BY fragen.id)
-            WHERE num_antworten < 100 AND downvotes < 3'''
+            WHERE num_antworten < 100 
+                AND downvotes < 3
+                AND id NOT IN (%s)
+            ORDER BY num_antworten DESC''' % (str(list(already_asked_ids)).replace('[','').replace(']',''))
     c.execute(q)
-    res = c.fetchall()
+    res = c.fetchone()
     if not res:
         return
-    id, fr, dv, num = random.choice(res)
+    id, fr, dv, num = res
     return dict(id=id, frage=fr, num=num)
-
 
 @db
 def len_fragen(c):
