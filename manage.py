@@ -72,6 +72,21 @@ def get_frage(c, already_asked_ids):
     return dict(id=id, frage=fr, num=num)
 
 @db
+def get_stats(c):
+    q = '''SELECT * from (
+            SELECT 
+                fragen.id,
+                fragen.frage, 
+                fragen.downvotes as downvotes,
+                count(antworten.id) AS num_antworten 
+            FROM fragen
+            LEFT JOIN antworten ON antworten.frage_id=fragen.id 
+            GROUP BY fragen.id)
+        ORDER BY num_antworten DESC'''
+    c.execute(q)
+    return c.fetchall()
+
+@db
 def len_fragen(c):
     c.execute("SELECT count(*) from fragen")
     return c.fetchone()[0]
