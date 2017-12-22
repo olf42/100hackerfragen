@@ -71,6 +71,14 @@ def get_frage(c, already_asked_ids):
     id, fr, dv, num = res
     return dict(id=id, frage=fr, num=num)
 
+
+@db
+def get_antworten(c, frage_id):
+    q = '''SELECT antwort from antworten WHERE frage_id=(?)'''
+    c.execute(q, (frage_id,))
+    return c.fetchall()
+
+
 @db
 def get_stats(c):
     q = '''SELECT * from (
