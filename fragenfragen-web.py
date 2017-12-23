@@ -1,8 +1,16 @@
-from flask import Flask, render_template, request, make_response
+from flask_session import Session
+from flask import Flask, session, render_template, request, make_response
 from manage import get_frage, add_antwort, add_frage, add_downvote, get_frage_by_id
 from config import APPROOT
 
-app = Flask("100hackerfragen-on-the-web")
+
+SESSION_TYPE = 'filesystem'
+
+
+app = Flask(__name__)
+app.config.from_object(__name__)
+Session(app)
+
 
 class ReverseProxied(object):
     def __init__(self, app):
@@ -34,7 +42,7 @@ def to_dict(args):
 
 @app.route('/')
 def index():
-	hfq = request.cookies.get('1hfq', '')
+	hfq = session.get('1hfq', '')
 	already_asked_ids = [int(i.replace('"', '')) for i in hfq.split(',') if i]
 	data = to_dict(request.args)
 	answered_id = None
@@ -57,7 +65,7 @@ def index():
 		approot=APPROOT))
 	if answered_id:
 		hfq = '{},"{}"'.format(hfq, answered_id)
-		resp.set_cookie('1hfq', hfq)
+		session['1hfq'] = hfq
 	return resp
 
 
