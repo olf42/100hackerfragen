@@ -6,3 +6,4 @@ __pycache__
 share
 config.py
 100hackerfragen.db
+flask_session
