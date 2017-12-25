@@ -9,7 +9,9 @@ def setup_db():
         CREATE TABLE fragen (
             id INTEGER PRIMARY KEY AUTOINCREMENT, 
             frage TEXT,
-            downvotes INTEGER)''')
+            downvotes INTEGER,
+            prio INTEGER default 0,
+            status TEXT default "")''')
     c.execute('''
         CREATE TABLE antworten (
             id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -56,6 +58,7 @@ def get_frage(c, already_asked_ids):
                     fragen.id,
                     fragen.frage, 
                     fragen.downvotes as downvotes,
+                    fragen.prio as prio,
                     count(antworten.id) AS num_antworten 
                 FROM fragen
                 LEFT JOIN antworten ON antworten.frage_id=fragen.id 
@@ -63,7 +66,7 @@ def get_frage(c, already_asked_ids):
             WHERE num_antworten < 100 
                 AND downvotes < 3
                 AND id NOT IN (%s)
-            ORDER BY num_antworten DESC''' % (str(list(already_asked_ids)).replace('[','').replace(']',''))
+            ORDER BY prio DESC, num_antworten DESC''' % (str(list(already_asked_ids)).replace('[','').replace(']',''))
     c.execute(q)
     res = c.fetchone()
     if not res:
@@ -73,19 +76,51 @@ def get_frage(c, already_asked_ids):
 
 
 @db
-def get_frage_by_id(c, id):
-    c.execute("SELECT frage FROM fragen WHERE id=(?)", (id,))
+def get_finished_frage(c):
+    """returns next finished frage"""
+    q = '''SELECT * from (
+                SELECT 
+                    fragen.id,
+                    fragen.frage, 
+                    fragen.downvotes as downvotes,
+                    fragen.status as status,
+                    count(antworten.id) AS num_antworten 
+                FROM fragen
+                LEFT JOIN antworten ON antworten.frage_id=fragen.id 
+                GROUP BY fragen.id)
+            WHERE num_antworten >= 100 
+                AND downvotes < 3
+                AND status=""'''
+    c.execute(q)
     res = c.fetchone()
     if res:
-        return res[0]
+        return res
+    return
+
+@db
+def get_frage_by_id(c, id):
+    c.execute("SELECT id, frage FROM fragen WHERE id=(?)", (id,))
+    res = c.fetchone()
+    if res:
+        return res
     return
 
 @db
 def get_antworten(c, frage_id):
-    q = '''SELECT antwort from antworten WHERE frage_id=(?)'''
+    q = '''SELECT id, antwort from antworten WHERE frage_id=(?)'''
     c.execute(q, (frage_id,))
     return c.fetchall()
 
+
+@db
+def update_antwort(c, id, new_antwort):
+    q = '''UPDATE antworten SET antwort=(?) WHERE id=(?)'''
+    c.execute(q, (new_antwort, id))
+
+@db
+def set_ready(c, id):
+    q = '''UPDATE fragen SET status="ready" WHERE id=(?)'''
+    c.execute(q, (id,))
 
 @db
 def get_stats(c):
