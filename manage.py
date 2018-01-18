@@ -71,7 +71,7 @@ def get_frage(c, already_asked_ids):
     res = c.fetchone()
     if not res:
         return
-    id, fr, dv, num = res
+    id, fr, dv, pr, num = res
     return dict(id=id, frage=fr, num=num)
 
 

@@ -14,7 +14,7 @@ for r in get_stats():
 		fin += 1
 	else:
 		op += 1
-	print(answers, downvotes, frage)
+	print(id, answers, downvotes, frage)
 
 print("Downvoted: {}".format(dv))
 print("Finished: {}".format(fin))

@@ -1,0 +1,25 @@
+<form action="/" method="GET">
+<h1>{{ frage }}</h1>
+<input type="hidden" name="processed_frage_id" value="{{ frage_id }}" />
+<input type="text" name="new_antwort" value="" />
+
+{% for antwort in antworten %}
+
+
+<div>
+	<input type="checkbox" name="ids" id="cb_{{ antwort['ids'] }}" value="{{ antwort['ids'] }}">
+	<label for="cb_{{ antwort['id'] }}">
+    <a href="/reveal?txt={{ antwort['antwort'] }}&anzahl={{ antwort['count'] }}&platz={{ antwort['platz'] }}&frage_id={{ frage_id }}"> 
+	{{ antwort['count'] }} {{ antwort['antwort'] }}</a></label>
+</div>
+
+{% endfor %}
+
+<hr />
+
+<label for="fertig">FERTIG?</label> <input id="fertig" type="checkbox" name="finished" value="yeah" />
+<br/>
+
+<input type="submit" />
+
+</form>
