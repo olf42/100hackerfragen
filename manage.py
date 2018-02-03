@@ -106,6 +106,12 @@ def get_frage_by_id(c, id):
     return
 
 @db
+def get_ready_fragen(c):
+    c.execute("SELECT id, frage FROM fragen WHERE status='ready'")
+    
+    return c.fetchall()
+
+@db
 def get_antworten(c, frage_id):
     q = '''SELECT id, antwort from antworten WHERE frage_id=(?)'''
     c.execute(q, (frage_id,))
@@ -145,5 +151,44 @@ def len_fragen(c):
 @db
 def len_antworten(c):
     return c.execute("SELECT count(*) from antworten").fetchone()[0]
+
+
+REPLACE = ['-',' ','!', '?',':)',';-)',';)']
+
+
+def normalize(antwort):
+    antwort = antwort.lower().strip()
+    for sc in REPLACE:
+        antwort = antwort.replace(sc, '')
+    return antwort
+
+
+def normalized_antworten(frage_id):
+    antworten = get_antworten(frage_id)
+  
+
+    processed_antworten = dict()
+
+    for id, antwort in antworten:
+        norm_ant = normalize(antwort)
+        if norm_ant not in processed_antworten:
+            processed_antworten[norm_ant] = dict(antwort=antwort, count=1, ids=[id])
+        else:
+            processed_antworten[norm_ant]['count'] += 1
+            processed_antworten[norm_ant]['ids'].append(id)
+
+    res = []
+    for pa in processed_antworten.items():
+        res.append((pa[1]['count'], pa[1]))
+
+    ants = []
+    pi = 0
+    for r in reversed(sorted(res, key=lambda x: x[0])):
+        pi += 1
+        a = r[1]
+        a['platz'] = pi
+        ants.append(a)
+    return ants
+
 
 print("Hello. We currently have {} questions and {} answers.".format(len_fragen(), len_antworten()))

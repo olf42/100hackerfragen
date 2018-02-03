@@ -1,0 +1,10 @@
+<h1>Frage auswählen</h1>
+
+{% for frage in fragen %}
+
+<div>
+    <a href="/frage?frage_id={{ frage[0] }}"> 
+	{{ frage[1] }}</a>
+</div>
+{% endfor %}
+

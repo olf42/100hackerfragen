@@ -4,12 +4,66 @@ from pygame.locals import *
 import time
 import os
 import os.path
+from PIL import Image
 
+pygame.mixer.init(44200, -16, 2, 512)
 pygame.init()
 
 FONT = None
 LINELEN = 32
 BG = None
+BUZZED = False
+
+MONO = 1
+GRAYSCALE = 2
+
+def buzz(side):
+    if side == 'A':
+        posy = 0
+    elif side == 'B':
+        posy = 400
+    play_sound('sounds/buzz.wav')
+    pygame.draw.rect(screen, (0,255,0), (posy,430,400,50))
+    pygame.display.flip()
+
+def reset_buzz_state():
+    pygame.draw.rect(screen, (0,0,0), (0,430,800,50))
+    pygame.display.flip()
+
+
+def play_sound(fn):
+    pygame.mixer.Sound(fn).play()
+
+
+def clear():
+    # clear the screen
+    pygame.draw.rect(screen, (0,0,0), (0,0,800,480))
+    pygame.display.flip()
+
+
+def load_image(fn):
+    # loads image, convert to grayscale and resize to screen size
+    img = Image.open(fn).convert('L')
+    if img.size != (800,480):
+        img = img.resize((800,480))
+    print("image {} loaded".format(fn))
+    return img
+
+
+def show_image(fn, mode=MONO):
+    clear()
+    img = load_image(fn)
+    for x in range(0, 800, 6):
+        for y in range(0, 480, 6):
+            px = img.getpixel((x,y))
+            if mode == MONO:
+                if px < 100:
+                    px = 255
+                else:
+                    px = 0
+            pygame.draw.rect(screen, (0, px, 0), (x,y,3,3))
+        time.sleep(0.005)
+        pygame.display.flip()
 
 
 def print_line(line, text=(LINELEN - 6) * '_', points='--', anim=True):
@@ -18,13 +72,11 @@ def print_line(line, text=(LINELEN - 6) * '_', points='--', anim=True):
     print("printing line")
     if anim:
         REVEAL_EFFECT_1.play()
-        time.sleep(0.5)
     for pos in range(LINELEN):
         display_points = '--'
         if anim and pos == LINELEN-1:
             display_points = points
             REVEAL_EFFECT_2.play()
-            time.sleep(0.5)
         txtpart = text[:pos]    
         prtxt = str(line)+'.' + txtpart + (LINELEN - 6 - len(txtpart)) * '_' + ' ' + display_points
         img = FONT.render(prtxt.upper(), 1, (0,255,0))
@@ -51,10 +103,11 @@ def prepare_round(round_id):
 
 PRINTLINE = USEREVENT+1
 TIMERTICK = USEREVENT+2
-REVEAL_EFFECT_1 = pygame.mixer.Sound('reveal.wav')
-REVEAL_EFFECT_2 = pygame.mixer.Sound('reveal2.wav')
+REVEAL_EFFECT_1 = pygame.mixer.Sound('sounds/reveal.wav')
+REVEAL_EFFECT_2 = pygame.mixer.Sound('sounds/reveal2.wav')
 
-screen = pygame.display.set_mode((800, 480), pygame.FULLSCREEN)
+#screen = pygame.display.set_mode((800, 480), pygame.FULLSCREEN)
+screen = pygame.display.set_mode((800, 480))
 pygame.mouse.set_visible(False)
 pygame.display.set_caption('Hackerspaceduell')
 pygame.time.set_timer(TIMERTICK, 250)
@@ -92,6 +145,7 @@ def check_for_message():
 
 
 def main():
+    buzzed = False
     while 1:
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -106,5 +160,25 @@ def main():
                     return
                 if event.key == K_f:
                     pygame.display.toggle_fullscreen()
-
+                if event.key == K_a:
+                    if not buzzed:
+                        buzzed = True
+                        buzz('A')
+                if event.key == K_b:
+                    if not buzzed:
+                        buzzed = True
+                        buzz('B')
+                if event.key == K_r:
+                    buzzed = False
+                    reset_buzz_state()                
+                if event.key == K_d:
+                    show_image('images/datenknoten.jpg')
+                if event.key == K_p:
+                    show_image('images/pesthoernchen.jpg')
+                if event.key == K_v:
+                    play_sound('sounds/tetris.wav')
+                    show_image('images/putin.jpg', GRAYSCALE)
+                if event.key == K_m:
+                    play_sound('sounds/merkel.wav')
+                    show_image('images/merkel.jpg', GRAYSCALE)
 if __name__ == '__main__': main()

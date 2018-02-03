@@ -1,0 +1,11 @@
+<h1>{{ frage }}</h1>
+
+{% for antwort in antworten %}
+
+<div>
+    <a href="/reveal?txt={{ antwort['antwort'] }}&anzahl={{ antwort['count'] }}&platz={{ antwort['platz'] }}&frage_id={{ frage_id }}"> 
+	{{ antwort['count'] }} {{ antwort['antwort'] }}</a>
+</div>
+
+{% endfor %}
+

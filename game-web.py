@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, make_response
-from manage import get_frage, set_ready, add_antwort, add_frage, add_downvote, get_frage_by_id, get_finished_frage, normalized_antworten, update_antwort
+from manage import get_frage, get_ready_fragen, set_ready, add_antwort, add_frage, add_downvote, get_frage_by_id, get_finished_frage, normalized_antworten, update_antwort
 from config import APPROOT
 
-app = Flask("100hackerfragen-verwalter")
+app = Flask("100hackerfragen-game-web")
 
 class ReverseProxied(object):
     def __init__(self, app):
@@ -32,6 +32,13 @@ def to_dict(args):
     return outdict
 
 
+@app.route('/')
+def index():
+    fragen = get_ready_fragen()
+    return render_template(
+        'fragenliste.html', 
+        fragen=fragen,
+        approot=APPROOT)
 
 
 @app.route('/reveal')
@@ -44,29 +51,14 @@ def reveal():
     platz = data['platz']
     with open('message', 'w') as f:
         f.write('{}{}{}'.format(platz, txt, anzahl))
-    return index()
+    return frage()
 
 
-@app.route('/')
-def index():
+@app.route('/frage')
+def frage():
     data = to_dict(request.args)
-    if 'new_antwort' in data:
-        ids = request.values.getlist('ids')
-        for a_id in ids:
-            for b_id in eval(a_id):
-                update_antwort(b_id, data['new_antwort'])
 
-    if 'finished' in data:
-        set_ready(data['processed_frage_id'])
-
-
-    if 'frage_id' in request.args:
-        frage = get_frage_by_id(data['frage_id'])
-    else:
-        frage = get_finished_frage()
-
-    if frage is None:
-        return "Something went wrong or no finished fragen."
+    frage = get_frage_by_id(data['frage_id'])
 
     frage_id = frage[0]
     frage = frage[1]
@@ -74,7 +66,7 @@ def index():
     ants = normalized_antworten(frage_id)
 
     return render_template(
-        'admin.html', 
+        'frage.html', 
         frage=frage,
         frage_id=frage_id,
         antworten=ants,
