@@ -6,28 +6,50 @@ import os
 import os.path
 from PIL import Image
 
-pygame.mixer.init(44200, -16, 2, 512)
+from multiprocessing import Process
+
+from gameweb import app
+
+webserver = Process(target=app.run, kwargs=dict(host='0.0.0.0'))
+webserver.start()
+
+pygame.mixer.init(44100, -16, 2, 512)
 pygame.init()
 
 FONT = None
 LINELEN = 32
 BG = None
 BUZZED = False
-
+FG = (0,255,0)
+RED = (255,0,0)
 MONO = 1
 GRAYSCALE = 2
+CURRENT_SLOTS = 0
+XDATA = """###         ###          
+ ###       ###
+  ###     ###        
+   ###   ###         
+    ### ###          
+     #####           
+      ###             
+     #####           
+    ### ###          
+   ###   ###
+  ###     ###
+ ###       ###
+###         ###""".splitlines()
 
 def buzz(side):
     if side == 'A':
-        posy = 0
+        posx = 0
     elif side == 'B':
-        posy = 400
+        posx = 1920/2
     play_sound('sounds/buzz.wav')
-    pygame.draw.rect(screen, (0,255,0), (posy,430,400,50))
+    pygame.draw.rect(screen, (0,255,0), (posx,1080-80,1920/2,1080))
     pygame.display.flip()
 
 def reset_buzz_state():
-    pygame.draw.rect(screen, (0,0,0), (0,430,800,50))
+    pygame.draw.rect(screen, (0,0,0), (0,1080-80,1920,1080))
     pygame.display.flip()
 
 
@@ -37,39 +59,64 @@ def play_sound(fn):
 
 def clear():
     # clear the screen
-    pygame.draw.rect(screen, (0,0,0), (0,0,800,480))
+    pygame.draw.rect(screen, (0,0,0), (0,0,1920,1080))
     pygame.display.flip()
 
 
 def load_image(fn):
     # loads image, convert to grayscale and resize to screen size
     img = Image.open(fn).convert('L')
-    if img.size != (800,480):
-        img = img.resize((800,480))
-    print("image {} loaded".format(fn))
+    if img.size != (1920,1080):
+        img = img.resize((1920,1080))
     return img
 
 
-def show_image(fn, mode=MONO):
+def add_x(pos, times):
+    if pos == 'L':
+        xstart = 50
+        xinc_mod = 1
+    elif pos == 'R':
+        xstart = 1920 - 50
+        xinc_mod = -1
+    ystart = 800
+
+    for xoff in range(times):
+        y = ystart
+        xoffset = 16*8*xoff
+        for line in XDATA:
+            x = xstart + (xoffset * xinc_mod)
+            for c in line:
+                if c == '#':
+                    pygame.draw.rect(screen, RED, (x,y,6,6))
+                x += (xinc_mod * 8)
+            y += 8
+
+    pygame.display.flip()
+
+
+
+def show_image(fn, mode=MONO, anim=False):
     clear()
     img = load_image(fn)
-    for x in range(0, 800, 6):
-        for y in range(0, 480, 6):
+    for x in range(0, 1920, 7):
+        for y in range(0, 1080, 7):
             px = img.getpixel((x,y))
             if mode == MONO:
                 if px < 100:
                     px = 255
                 else:
                     px = 0
-            pygame.draw.rect(screen, (0, px, 0), (x,y,3,3))
-        time.sleep(0.005)
-        pygame.display.flip()
+            pygame.draw.rect(screen, (0, px, 0), (x,y,6,6))
+        if anim:
+            pygame.display.flip()
+    pygame.display.flip()
 
 
 def print_line(line, text=(LINELEN - 6) * '_', points='--', anim=True):
     """Prints text in the given line"""
+    if line > CURRENT_SLOTS:
+        return
     previmg = None
-    print("printing line")
     if anim:
         REVEAL_EFFECT_1.play()
     for pos in range(LINELEN):
@@ -82,8 +129,8 @@ def print_line(line, text=(LINELEN - 6) * '_', points='--', anim=True):
         img = FONT.render(prtxt.upper(), 1, (0,255,0))
         if previmg is not None:
             previmg.fill((0,0,0))
-            BG.blit(previmg, (40,50*line))
-        BG.blit(img, (40, 50*line))
+            BG.blit(previmg, (40,120*line))
+        BG.blit(img, (40, 120*line))
         screen.blit(BG, (0, 0))
         previmg = img
         if anim:
@@ -93,12 +140,19 @@ def print_line(line, text=(LINELEN - 6) * '_', points='--', anim=True):
         pygame.display.flip()
 
 
-round_id_to_num_of_rounds = lambda x: -x+7
-
-
-def prepare_round(round_id):
-    for x in range(1, round_id_to_num_of_rounds(round_id) + 1):
-        print_line(x, anim=False)
+def prepare_round(num):
+    global CURRENT_SLOTS
+    show_image('images/pig{}.jpg'.format(num), GRAYSCALE, True)
+    for x in range(num):
+        play_sound('sounds/pig.wav')
+        time.sleep(0.5)
+    time.sleep(4)
+    clear()
+    BG.fill((0, 0, 0))
+    slots = {1:6, 2:5, 3:4}[num]
+    CURRENT_SLOTS = slots
+    for x in range(0, slots):
+        print_line(x+1, anim=False)
 
 
 PRINTLINE = USEREVENT+1
@@ -106,18 +160,16 @@ TIMERTICK = USEREVENT+2
 REVEAL_EFFECT_1 = pygame.mixer.Sound('sounds/reveal.wav')
 REVEAL_EFFECT_2 = pygame.mixer.Sound('sounds/reveal2.wav')
 
-#screen = pygame.display.set_mode((800, 480), pygame.FULLSCREEN)
-screen = pygame.display.set_mode((800, 480))
+screen = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN)
+#screen = pygame.display.set_mode((1920, 1080))
 pygame.mouse.set_visible(False)
 pygame.display.set_caption('Hackerspaceduell')
 pygame.time.set_timer(TIMERTICK, 250)
-FONT = pygame.font.SysFont('myfont', 32)
+FONT = pygame.font.SysFont('myfont', 80)
 # Fill background
 BG = pygame.Surface(screen.get_size())
 BG = BG.convert()
-BG.fill((10, 10, 10))
-prepare_round(1)
-
+BG.fill((0, 0, 0))
 
 def post_print_line_event(line, text, points):
     prl_event = pygame.event.Event(PRINTLINE, line=line, text=text, points=points)
@@ -144,19 +196,55 @@ def check_for_message():
         os.unlink('message')
 
 
+class Team(object):
+    points = 0
+    wrong = 0
+    pos = ''
+
+    def __init__(self, name, pos):
+        self.pos = pos
+        self.name = name
+        self.points = 0
+        self.wrong = 0
+
+    def wrong_answer(self):
+        play_sound('sounds/fail.wav')
+        self.wrong += 1
+        add_x(self.pos, self.wrong)
+
+
+
+
+class Game(object):
+    team_a = None
+    team_b = None
+    team_on_turn = None
+
+    def __init__(self):
+        self.team_a = Team('Left team', 'L')
+        self.team_b = Team('Right team', 'R')
+
+    def team_on_turn_answered_wrong(self):
+        self.team_on_turn.wrong_answer()
+
+
+
+
 def main():
+    game = Game()
     buzzed = False
     while 1:
         for event in pygame.event.get():
             if event.type == QUIT:
+                webserver.terminate()
                 return
             if event.type == PRINTLINE:
                 handle_print_line_event(event)
             if event.type == TIMERTICK:
-                print("checking")
                 check_for_message()
             if event.type == KEYDOWN:
                 if event.key == K_q:
+                    webserver.terminate()
                     return
                 if event.key == K_f:
                     pygame.display.toggle_fullscreen()
@@ -164,21 +252,143 @@ def main():
                     if not buzzed:
                         buzzed = True
                         buzz('A')
+                        game.team_on_turn = game.team_a
                 if event.key == K_b:
                     if not buzzed:
                         buzzed = True
                         buzz('B')
+                        game.team_on_turn = game.team_b
                 if event.key == K_r:
                     buzzed = False
                     reset_buzz_state()                
+
+
+                if event.key == K_x:
+                    game.team_on_turn_answered_wrong()
+                if event.key == K_1:
+                    prepare_round(1)
+                if event.key == K_2:
+                    prepare_round(2)
+                if event.key == K_3:
+                    prepare_round(3)
+
+
                 if event.key == K_d:
+                    prev = screen.copy()
+                    play_sound('sounds/ccc.wav')
                     show_image('images/datenknoten.jpg')
+                if event.key == K_w:
+
+                    prev = screen.copy()
+                    play_sound('sounds/wat.wav')
+                    show_image('images/wat.jpg', GRAYSCALE)
+                if event.key == K_c:
+                    prev = screen.copy()
+                    play_sound('sounds/cyber.wav')
+                    def cyb_to_prev():
+                        show_image('images/cyber.jpg', GRAYSCALE)
+                        pygame.display.flip()
+                        screen.blit(prev, (0,0))
+                        pygame.display.flip()
+                    def prev_to_cyb():
+                        screen.blit(prev, (0,0))
+                        pygame.display.flip()
+                        show_image('images/cyber.jpg', GRAYSCALE)
+                        pygame.display.flip()
+                    prev_to_cyb()
+                    time.sleep(0.1)
+                    cyb_to_prev()
+                    time.sleep(0.2)
+                    prev_to_cyb()
+                    time.sleep(0.1)
+                    cyb_to_prev()
+                    time.sleep(0.2)
+                    prev_to_cyb()
+                    time.sleep(0.5)
+                    cyb_to_prev()
+                    time.sleep(0.3)
+                    prev_to_cyb()
+                    time.sleep(0.1)
+                    cyb_to_prev()
+                    time.sleep(0.5)
+
+                    pygame.mixer.fadeout(300)
+
+
                 if event.key == K_p:
+
+                    prev = screen.copy()
+                    play_sound('sounds/modem.wav')
                     show_image('images/pesthoernchen.jpg')
                 if event.key == K_v:
+
+                    prev = screen.copy()
                     play_sound('sounds/tetris.wav')
                     show_image('images/putin.jpg', GRAYSCALE)
                 if event.key == K_m:
+
+                    prev = screen.copy()
                     play_sound('sounds/merkel.wav')
-                    show_image('images/merkel.jpg', GRAYSCALE)
+                    show_image('images/merkel.jpg', GRAYSCALE)                
+
+                if event.key == K_k:
+                    prev = screen.copy()
+                    #play_sound('sounds/merkel.wav')
+                    show_image('images/facepalm.jpg', GRAYSCALE)
+                if event.key == K_l:
+                    prev = screen.copy()
+                    play_sound('sounds/lol.wav')
+                    show_image('images/lol.jpg', GRAYSCALE)                
+                if event.key == K_n:
+                    prev = screen.copy()
+                    play_sound('sounds/nyan.wav')
+                    show_image('images/nyan.jpg', GRAYSCALE)
+
+            if event.type == KEYUP:
+                if event.key in (K_n,K_l, K_k, K_d, K_w, K_p, K_v, K_m, K_c):
+                    screen.blit(prev, (0,0))
+                    pygame.display.flip()
+                    pygame.mixer.fadeout(300)
+
+print("""
+
+WELCOME TO 100HACKERFRAGEN SCREEN
+
+Keys:
+
+  Game conrols:
+
+    a ... Left Buzzer
+    b ... Right Buzzer
+    r ... Reset Buzzer
+
+    1,2,3 ... Init round
+
+    x ... wrong answer for last buzzed team
+
+    q ... quit
+    f ... toggle fullscreen
+
+
+  Memes (Press and hold):
+
+    d ... ccc
+    w ... WAT
+    c ... CYBER
+    p ... BTX
+    v ... putin
+    m ... merkel
+    k ... facepalm
+    l ... lol
+    n ... nyancat
+
+
+
+
+
+    """)
+
+
+
+
 if __name__ == '__main__': main()
