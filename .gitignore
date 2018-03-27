@@ -8,3 +8,4 @@ config.py
 100hackerfragen.db
 flask_session
 etc
+pip-selfcheck.json
