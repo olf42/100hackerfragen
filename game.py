@@ -25,9 +25,7 @@ RED = (255,0,0)
 MONO = 1
 GRAYSCALE = 2
 CURRENT_SLOTS = 0
-XDATA = """###         ###          
- ###       ###
-  ###     ###        
+XDATA = """  ###     ###
    ###   ###         
     ### ###          
      #####           
@@ -36,20 +34,20 @@ XDATA = """###         ###
     ### ###          
    ###   ###
   ###     ###
- ###       ###
-###         ###""".splitlines()
+""".splitlines()
 
-def buzz(side):
+def buzz(side, silent=False):
     if side == 'A':
         posx = 0
     elif side == 'B':
         posx = 1920/2
-    play_sound('sounds/buzz.wav')
-    pygame.draw.rect(screen, (0,255,0), (posx,1080-80,1920/2,1080))
+    if not silent:
+        play_sound('sounds/buzz.wav')
+    pygame.draw.rect(screen, (0,255,0), (posx,0,1920/2,15))
     pygame.display.flip()
 
 def reset_buzz_state():
-    pygame.draw.rect(screen, (0,0,0), (0,1080-80,1920,1080))
+    pygame.draw.rect(screen, (0,0,0), (0,0,1920,15))
     pygame.display.flip()
 
 
@@ -73,16 +71,16 @@ def load_image(fn):
 
 def add_x(pos, times):
     if pos == 'L':
-        xstart = 50
+        xstart = 250
         xinc_mod = 1
     elif pos == 'R':
-        xstart = 1920 - 50
+        xstart = 1920 - 250
         xinc_mod = -1
-    ystart = 800
+    ystart = 1000
 
     for xoff in range(times):
         y = ystart
-        xoffset = 16*8*xoff
+        xoffset = 14*8*xoff
         for line in XDATA:
             x = xstart + (xoffset * xinc_mod)
             for c in line:
@@ -112,26 +110,45 @@ def show_image(fn, mode=MONO, anim=False):
     pygame.display.flip()
 
 
+def add_text(pos, text):
+    """print text on the given position"""
+    img = FONT.render(text.upper(), 1, (0,255,0))
+    print(pos)
+    pygame.draw.rect(BG, (0,0,0), (pos[0], pos[1], 60*len(text), 80))
+    BG.blit(img, pos)
+    screen.blit(BG, pos, (pos[0], pos[1], pos[0]+(60*len(text)), pos[1]+80))
+    pygame.display.flip()
+
 def print_line(line, text=(LINELEN - 6) * '_', points='--', anim=True):
     """Prints text in the given line"""
-    if line > CURRENT_SLOTS:
-        return
     previmg = None
-    if anim:
+    is_sum = False
+    if text == 'SUMME':
+        is_sum = True
+        line = CURRENT_SLOTS + 1
+    if not is_sum and (line > CURRENT_SLOTS):
+        return
+
+
+    if anim and not is_sum:
         REVEAL_EFFECT_1.play()
     for pos in range(LINELEN):
         display_points = '--'
-        if anim and pos == LINELEN-1:
+        if pos == LINELEN-1:
             display_points = points
+        if not is_sum and anim and pos == LINELEN - 1:
             REVEAL_EFFECT_2.play()
         txtpart = text[:pos]    
-        prtxt = str(line)+'.' + txtpart + (LINELEN - 6 - len(txtpart)) * '_' + ' ' + display_points
+        if is_sum:
+            prtxt = ' '* (LINELEN - 9) + txtpart + ' ' + display_points
+        else:
+            prtxt = str(line)+'.' + txtpart + (LINELEN - 6 - len(txtpart)) * '_' + ' ' + display_points
         img = FONT.render(prtxt.upper(), 1, (0,255,0))
         if previmg is not None:
             previmg.fill((0,0,0))
             BG.blit(previmg, (40,120*line))
         BG.blit(img, (40, 120*line))
-        screen.blit(BG, (0, 0))
+        screen.blit(BG, (0, 16), (0,16,1920,930))
         previmg = img
         if anim:
             pygame.display.flip()
@@ -140,19 +157,23 @@ def print_line(line, text=(LINELEN - 6) * '_', points='--', anim=True):
         pygame.display.flip()
 
 
-def prepare_round(num):
+def prepare_round(num, game):
     global CURRENT_SLOTS
+    game.reset_round()
+    game.multiplier = num
     show_image('images/pig{}.jpg'.format(num), GRAYSCALE, True)
     for x in range(num):
         play_sound('sounds/pig.wav')
         time.sleep(0.5)
-    time.sleep(4)
+    #time.sleep(4)
     clear()
     BG.fill((0, 0, 0))
     slots = {1:6, 2:5, 3:4}[num]
     CURRENT_SLOTS = slots
     for x in range(0, slots):
         print_line(x+1, anim=False)
+    game.print_team_points()
+    game.print_total_points()
 
 
 PRINTLINE = USEREVENT+1
@@ -160,8 +181,8 @@ TIMERTICK = USEREVENT+2
 REVEAL_EFFECT_1 = pygame.mixer.Sound('sounds/reveal.wav')
 REVEAL_EFFECT_2 = pygame.mixer.Sound('sounds/reveal2.wav')
 
-screen = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN)
-#screen = pygame.display.set_mode((1920, 1080))
+#screen = pygame.display.set_mode((1920, 1080)), pygame.FULLSCREEN)
+screen = pygame.display.set_mode((1920, 1080))
 pygame.mouse.set_visible(False)
 pygame.display.set_caption('Hackerspaceduell')
 pygame.time.set_timer(TIMERTICK, 250)
@@ -171,26 +192,28 @@ BG = pygame.Surface(screen.get_size())
 BG = BG.convert()
 BG.fill((0, 0, 0))
 
-def post_print_line_event(line, text, points):
-    prl_event = pygame.event.Event(PRINTLINE, line=line, text=text, points=points)
+def post_print_line_event(line, text, points, game):
+    prl_event = pygame.event.Event(PRINTLINE, line=line, text=text, points=points, game=game)
     print("posting event")
     pygame.event.post(prl_event) 
     
     
 def handle_print_line_event(event):
     print_line(event.line, event.text, event.points)
-    screen.blit(BG, (0, 0))
+    event.game.add_points(event.points)
+    print_line(7, 'SUMME', '{:>2}'.format(int(event.game.total_points/event.game.multiplier)), False)
+    screen.blit(BG, (0, 16), (0,16,1920,930))
     pygame.display.flip()
 
 
-def check_for_message():
+def check_for_message(game):
     rm_file = False
     if not os.path.isfile('message'):
         return
     with open('message') as msgfile:
         msg = msgfile.read().strip()
         if msg:
-            post_print_line_event(int(msg[0]), msg[1:-2], msg[-2:])
+            post_print_line_event(int(msg[0]), msg[1:-2], msg[-2:], game)
             rm_file = True
     if rm_file:
         os.unlink('message')
@@ -208,9 +231,10 @@ class Team(object):
         self.wrong = 0
 
     def wrong_answer(self):
-        play_sound('sounds/fail.wav')
-        self.wrong += 1
-        add_x(self.pos, self.wrong)
+        if self.wrong < 3:
+            play_sound('sounds/fail.wav')
+            self.wrong += 1
+            add_x(self.pos, self.wrong)
 
 
 
@@ -219,20 +243,46 @@ class Game(object):
     team_a = None
     team_b = None
     team_on_turn = None
+    total_points = 0
+    buzzed = False
+    multiplier = 1
 
     def __init__(self):
         self.team_a = Team('Left team', 'L')
         self.team_b = Team('Right team', 'R')
 
     def team_on_turn_answered_wrong(self):
-        self.team_on_turn.wrong_answer()
+        if self.team_on_turn is not None:
+            self.team_on_turn.wrong_answer()
 
+    def reset_round(self):
+        self.team_on_turn = None
+        self.team_a.wrong = 0
+        self.team_b.wrong = 0
+        self.total_points = 0
+        self.buzzed = False
 
+    def finish_round(self):
+        if self.team_on_turn is None:
+            return
+        self.team_on_turn.points += self.total_points
+        self.print_team_points()
+        self.reset_round()
+        self.print_total_points()
 
+    def print_team_points(self):
+        add_text((60,1000), '{:<3}'.format(self.team_a.points))
+        add_text((1920-240,1000), '{:>3}'.format(self.team_b.points))
+
+    def add_points(self, points):
+        self.total_points += (int(points) * self.multiplier)
+        self.print_total_points()
+
+    def print_total_points(self):
+        add_text((960-60,1000), '{:^3}'.format(self.total_points))
 
 def main():
     game = Game()
-    buzzed = False
     while 1:
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -241,7 +291,7 @@ def main():
             if event.type == PRINTLINE:
                 handle_print_line_event(event)
             if event.type == TIMERTICK:
-                check_for_message()
+                check_for_message(game)
             if event.type == KEYDOWN:
                 if event.key == K_q:
                     webserver.terminate()
@@ -249,28 +299,42 @@ def main():
                 if event.key == K_f:
                     pygame.display.toggle_fullscreen()
                 if event.key == K_a:
-                    if not buzzed:
-                        buzzed = True
+                    if not game.buzzed:
+                        game.buzzed = True
                         buzz('A')
                         game.team_on_turn = game.team_a
                 if event.key == K_b:
-                    if not buzzed:
-                        buzzed = True
+                    if not game.buzzed:
+                        game.buzzed = True
                         buzz('B')
                         game.team_on_turn = game.team_b
+                if event.key == K_s:
+                    if not game.buzzed:
+                        game.buzzed = True
+                        buzz('A', True)
+                        game.team_on_turn = game.team_a
+                if event.key == K_o:
+                    if not game.buzzed:
+                        game.buzzed = True
+                        buzz('B', True)
+                        game.team_on_turn = game.team_b
+
                 if event.key == K_r:
-                    buzzed = False
+                    game.buzzed = False
                     reset_buzz_state()                
 
 
                 if event.key == K_x:
                     game.team_on_turn_answered_wrong()
                 if event.key == K_1:
-                    prepare_round(1)
+                    prepare_round(1, game)
                 if event.key == K_2:
-                    prepare_round(2)
+                    prepare_round(2, game)
                 if event.key == K_3:
-                    prepare_round(3)
+                    prepare_round(3, game)
+
+                if event.key == K_0:
+                    game.finish_round()
 
 
                 if event.key == K_d:
@@ -359,10 +423,14 @@ Keys:
   Game conrols:
 
     a ... Left Buzzer
+    s ... Left Buzzer - silent
     b ... Right Buzzer
+    o ... Right Buzzer - silent
     r ... Reset Buzzer
 
     1,2,3 ... Init round
+
+    0 ... Finish round
 
     x ... wrong answer for last buzzed team
 
@@ -376,7 +444,7 @@ Keys:
     w ... WAT
     c ... CYBER
     p ... BTX
-    v ... putin
+    o ... putin
     m ... merkel
     k ... facepalm
     l ... lol
