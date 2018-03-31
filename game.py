@@ -326,6 +326,8 @@ def main():
 
                 if event.key == K_x:
                     game.team_on_turn_answered_wrong()
+                if event.key == K_y:
+                    play_sound('sounds/fail.wav')
                 if event.key == K_1:
                     prepare_round(1, game)
                 if event.key == K_2:
@@ -433,7 +435,8 @@ Keys:
     0 ... Finish round
 
     x ... wrong answer for last buzzed team
-
+    y ... wrong answer without displaying "x" 
+    
     q ... quit
     f ... toggle fullscreen
 
@@ -444,7 +447,7 @@ Keys:
     w ... WAT
     c ... CYBER
     p ... BTX
-    o ... putin
+    v ... putin
     m ... merkel
     k ... facepalm
     l ... lol
