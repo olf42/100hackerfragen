@@ -250,6 +250,11 @@ class Game(object):
     def __init__(self):
         self.team_a = Team('Left team', 'L')
         self.team_b = Team('Right team', 'R')
+        with open('points','r') as pointsfile:
+            pa, pb = pointsfile.read().splitlines()
+            self.team_a.points = int(pa)
+            self.team_b.points = int(pb)
+
 
     def team_on_turn_answered_wrong(self):
         if self.team_on_turn is not None:
@@ -271,6 +276,10 @@ class Game(object):
         self.print_total_points()
 
     def print_team_points(self):
+        with open('points','w') as pointsfile:
+            for pts in (self.team_a.points, self.team_b.points):
+                pointsfile.write(str(pts) + '\n')
+
         add_text((60,1000), '{:<3}'.format(self.team_a.points))
         add_text((1920-240,1000), '{:>3}'.format(self.team_b.points))
 
@@ -436,7 +445,7 @@ Keys:
 
     x ... wrong answer for last buzzed team
     y ... wrong answer without displaying "x" 
-    
+
     q ... quit
     f ... toggle fullscreen
 
