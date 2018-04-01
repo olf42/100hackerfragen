@@ -1,0 +1,52 @@
+runde1 
+
+runde2
+
+runde3
+
+
+
+
+
+publikumsfragen:
+
+1. http://localhost:5000/frage?frage_id=94 
+
+Wer zuerst eine Antwort errät, die *nicht* genannt wurde, bekommt nen Preis.  Game conrols:
+
+
+
+
+
+
+CONTROLS
+
+    a ... Left Buzzer
+    s ... Left Buzzer - silent
+    b ... Right Buzzer
+    o ... Right Buzzer - silent
+    
+    r ... Reset Buzzer
+
+    1,2,3 ... Init round
+
+    0 ... Finish round
+
+    x ... wrong answer for last buzzed team
+    y ... wrong answer without displaying "x" 
+    
+    q ... quit
+    f ... toggle fullscreen
+
+
+  Memes (Press and hold):
+
+    d ... ccc
+    w ... WAT
+    c ... CYBER
+    p ... BTX
+    v ... putin
+    m ... merkel
+    k ... facepalm
+    l ... lol
+    n ... nyancat
