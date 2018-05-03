@@ -446,8 +446,8 @@ def main():
 
                 if event.key in NP_NUMS:
                     meme = str(NP_NUMS.index(event.key) + 1)
+                    prev = screen.copy()
                     if meme in MEMES:
-                        prev = screen.copy()
                         sndfile = 'memes/{}/sound.wav'.format(meme)
                         imgfile = 'memes/{}/image.jpg'.format(meme)
                         if os.path.isfile(sndfile):
