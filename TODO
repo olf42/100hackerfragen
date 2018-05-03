@@ -1,0 +1,29 @@
+- Fragen aus Dateien einlesen (siehe import/)
+- Memes Sounds/Bilder als einzelne Ordner mit Grafik+Sound
+   -> Wenn Bild fehlt, nur Sound
+   -> Sound auch prüfen, ob da
+
+- Batch-Datei für Webserver:
+set FLASK_APP=gameweb.py
+flask run
++ listen auf 0.0.0.0 
+
+
+
+
+1-9 memes
+( left buzzer
+) right buzzer
+= left buzzer silent
+backspace right buzzer silent
+
++ reset buzzer
+
+Tab, /, * init round 1,2,3
+- finish round
+
+0 wrong answer 
+enter wrong answer without x
+
+
+98*/65

@@ -1,0 +1,5 @@
+Wie geht es dir?
+5,Gut
+5,Schlecht
+3,Beschissen
+

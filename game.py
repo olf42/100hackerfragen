@@ -9,9 +9,20 @@ from PIL import Image
 from multiprocessing import Process
 
 from gameweb import app
+import ctypes
 
-webserver = Process(target=app.run, kwargs=dict(host='0.0.0.0'))
-webserver.start()
+K_a = 267  # /
+K_b = 268  # *    
+K_o = 269  # -    
+K_s = 9 # tab
+K_x = 256 # 0 
+K_y = 271 # enter
+
+# don't let windows ui scale setting affect pygame screen content
+try:
+    ctypes.windll.user32.SetProcessDPIAware()
+except AttributeError:
+    pass
 
 pygame.mixer.init(44100, -16, 2, 512)
 pygame.init()
@@ -35,6 +46,16 @@ XDATA = """  ###     ###
    ###   ###
   ###     ###
 """.splitlines()
+
+
+MEMES = []
+
+for dirname, dirnames, filenames in os.walk('./memes'):
+    if dirname.startswith('./memes/'):
+        if filenames:
+            MEMES.append(dirname[-1])
+
+print(MEMES)
 
 def buzz(side, silent=False):
     if side == 'A':
@@ -161,6 +182,7 @@ def prepare_round(num, game):
     global CURRENT_SLOTS
     game.reset_round()
     game.multiplier = num
+    play_sound('sounds/intro.wav')
     show_image('images/pig{}.jpg'.format(num), GRAYSCALE, True)
     for x in range(num):
         play_sound('sounds/pig.wav')
@@ -181,12 +203,13 @@ TIMERTICK = USEREVENT+2
 REVEAL_EFFECT_1 = pygame.mixer.Sound('sounds/reveal.wav')
 REVEAL_EFFECT_2 = pygame.mixer.Sound('sounds/reveal2.wav')
 
-#screen = pygame.display.set_mode((1920, 1080)), pygame.FULLSCREEN)
-screen = pygame.display.set_mode((1920, 1080))
+NP_NUMS = list(range(257,263))
+
+screen = pygame.display.set_mode((1920, 1080))#, pygame.FULLSCREEN)
 pygame.mouse.set_visible(False)
 pygame.display.set_caption('Hackerspaceduell')
 pygame.time.set_timer(TIMERTICK, 250)
-FONT = pygame.font.SysFont('myfont', 80)
+FONT = pygame.font.Font('myfont.otf', 80)
 # Fill background
 BG = pygame.Surface(screen.get_size())
 BG = BG.convert()
@@ -250,7 +273,7 @@ class Game(object):
     def __init__(self):
         self.team_a = Team('Left team', 'L')
         self.team_b = Team('Right team', 'R')
-        with open('points','r') as pointsfile:
+        with open('points.txt','r') as pointsfile:
             pa, pb = pointsfile.read().splitlines()
             self.team_a.points = int(pa)
             self.team_b.points = int(pb)
@@ -276,7 +299,7 @@ class Game(object):
         self.print_total_points()
 
     def print_team_points(self):
-        with open('points','w') as pointsfile:
+        with open('points.txt','w') as pointsfile:
             for pts in (self.team_a.points, self.team_b.points):
                 pointsfile.write(str(pts) + '\n')
 
@@ -292,6 +315,8 @@ class Game(object):
 
 def main():
     game = Game()
+    fullscreen = True
+    global screen
     while 1:
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -302,11 +327,23 @@ def main():
             if event.type == TIMERTICK:
                 check_for_message(game)
             if event.type == KEYDOWN:
+                if event.key == 266: #np .
+                    play_sound('sounds/intro.wav')
                 if event.key == K_q:
-                    webserver.terminate()
                     return
                 if event.key == K_f:
-                    pygame.display.toggle_fullscreen()
+                    if pygame.display.get_driver()=='x11':
+                        pygame.display.toggle_fullscreen()
+                    else:
+                        acopy=screen.copy()                    
+                        if fullscreen:
+                            screen=pygame.display.set_mode((1920,1080))
+                            fullscreen = False
+                        else:
+                            screen=pygame.display.set_mode((1920,1080), pygame.FULLSCREEN)
+                            fullscreen = True
+                            screen.blit(acopy, (0,0))                    
+                            pygame.display.update()
                 if event.key == K_a:
                     if not game.buzzed:
                         game.buzzed = True
@@ -328,7 +365,7 @@ def main():
                         buzz('B', True)
                         game.team_on_turn = game.team_b
 
-                if event.key == K_r:
+                if event.key == 8:
                     game.buzzed = False
                     reset_buzz_state()                
 
@@ -337,14 +374,14 @@ def main():
                     game.team_on_turn_answered_wrong()
                 if event.key == K_y:
                     play_sound('sounds/fail.wav')
-                if event.key == K_1:
+                if event.key == 263: 
                     prepare_round(1, game)
-                if event.key == K_2:
+                if event.key == 264: 
                     prepare_round(2, game)
-                if event.key == K_3:
+                if event.key == 265: 
                     prepare_round(3, game)
 
-                if event.key == K_0:
+                if event.key == 270: # np +
                     game.finish_round()
 
 
@@ -353,59 +390,21 @@ def main():
                     play_sound('sounds/ccc.wav')
                     show_image('images/datenknoten.jpg')
                 if event.key == K_w:
-
                     prev = screen.copy()
                     play_sound('sounds/wat.wav')
                     show_image('images/wat.jpg', GRAYSCALE)
-                if event.key == K_c:
-                    prev = screen.copy()
-                    play_sound('sounds/cyber.wav')
-                    def cyb_to_prev():
-                        show_image('images/cyber.jpg', GRAYSCALE)
-                        pygame.display.flip()
-                        screen.blit(prev, (0,0))
-                        pygame.display.flip()
-                    def prev_to_cyb():
-                        screen.blit(prev, (0,0))
-                        pygame.display.flip()
-                        show_image('images/cyber.jpg', GRAYSCALE)
-                        pygame.display.flip()
-                    prev_to_cyb()
-                    time.sleep(0.1)
-                    cyb_to_prev()
-                    time.sleep(0.2)
-                    prev_to_cyb()
-                    time.sleep(0.1)
-                    cyb_to_prev()
-                    time.sleep(0.2)
-                    prev_to_cyb()
-                    time.sleep(0.5)
-                    cyb_to_prev()
-                    time.sleep(0.3)
-                    prev_to_cyb()
-                    time.sleep(0.1)
-                    cyb_to_prev()
-                    time.sleep(0.5)
-
-                    pygame.mixer.fadeout(300)
-
-
                 if event.key == K_p:
-
                     prev = screen.copy()
                     play_sound('sounds/modem.wav')
                     show_image('images/pesthoernchen.jpg')
                 if event.key == K_v:
-
                     prev = screen.copy()
                     play_sound('sounds/tetris.wav')
                     show_image('images/putin.jpg', GRAYSCALE)
                 if event.key == K_m:
-
                     prev = screen.copy()
                     play_sound('sounds/merkel.wav')
                     show_image('images/merkel.jpg', GRAYSCALE)                
-
                 if event.key == K_k:
                     prev = screen.copy()
                     #play_sound('sounds/merkel.wav')
@@ -418,9 +417,46 @@ def main():
                     prev = screen.copy()
                     play_sound('sounds/nyan.wav')
                     show_image('images/nyan.jpg', GRAYSCALE)
+                
+                if event.key == K_c:
+                    cur = 'prev' 
+                    prev = screen.copy()
+                    play_sound('sounds/cyber.wav')
+                    def cyb_to_prev():
+                        show_image('images/cyber.jpg', GRAYSCALE)
+                        pygame.display.flip()
+                        screen.blit(prev, (0,0))
+                        pygame.display.flip()
+                    def prev_to_cyb():
+                        screen.blit(prev, (0,0))
+                        pygame.display.flip()
+                        show_image('images/cyber.jpg', GRAYSCALE)
+                        pygame.display.flip()
+                    def togg_cyb(cur):
+                        if cur == 'prev':
+                            prev_to_cyb()
+                            return 'cyb'
+                        else:
+                            cyb_to_prev()
+                            return 'prev'
+                    for delay in [0.1,0.2,0.1,0.2,0.5,0.3,0.1,0.5]:
+                        cur = togg_cyb(cur)
+                        time.sleep(delay)
+                    pygame.mixer.fadeout(300)
 
+                if event.key in NP_NUMS:
+                    meme = str(NP_NUMS.index(event.key) + 1)
+                    if meme in MEMES:
+                        prev = screen.copy()
+                        sndfile = 'memes/{}/sound.wav'.format(meme)
+                        imgfile = 'memes/{}/image.jpg'.format(meme)
+                        if os.path.isfile(sndfile):
+                            play_sound(sndfile)
+                        if os.path.isfile(imgfile):
+                            show_image(imgfile, GRAYSCALE)
+                print(event.key)
             if event.type == KEYUP:
-                if event.key in (K_n,K_l, K_k, K_d, K_w, K_p, K_v, K_m, K_c):
+                if event.key in [K_n,K_l, K_k, K_d, K_w, K_p, K_v, K_m, K_c] + NP_NUMS:
                     screen.blit(prev, (0,0))
                     pygame.display.flip()
                     pygame.mixer.fadeout(300)
