@@ -27,3 +27,18 @@ enter wrong answer without x
 
 
 98*/65
+
+
+TODO @ Hackerspaceduell für 35C3
+
+
+Buzzer überprüfen!
+
+Umlaute wie Ä,Ö,Ü umwandeln in A,O,U, bzw allgemein jegliche 
+gebräuchliche Unicode-Zeichen in ASCII-/vom Font interpretierbare Zeichen umwandeln
+
+Problem beim Antworten, wenn eine Seite falsch gelegen hat: die andere Seite muss erst wieder „aktiv“ gemacht werden,
+d.h. der Balken muss zur anderen seite wandern. wäre besser wenn man die taste für das X drückt dass immer nur diese
+eine taste gedrückt werden muss und bei der anderen seite dasselbe, nur dass da eine zusatztaste wie bspw. shift oder
+strg
+
