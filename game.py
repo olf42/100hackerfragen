@@ -127,7 +127,6 @@ def show_image(fn, mode=MONO, anim=False):
 def add_text(pos, text):
     """print text on the given position"""
     img = FONT.render(text.upper(), 1, (0,255,0))
-    print(pos)
     pygame.draw.rect(BG, (0,0,0), (pos[0], pos[1], 60*len(text), 80))
     BG.blit(img, pos)
     screen.blit(BG, pos, (pos[0], pos[1], pos[0]+(60*len(text)), pos[1]+80))
@@ -454,8 +453,8 @@ def main():
                     pygame.display.flip()
                     pygame.mixer.fadeout(300)
 
-print("""
-
+#print("""
+"""
 WELCOME TO 100HACKERFRAGEN SCREEN
 
 Keys:
@@ -495,7 +494,7 @@ Keys:
 
 
 
-    """)
+    """
 
 
 

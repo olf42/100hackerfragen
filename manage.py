@@ -1,9 +1,12 @@
 import sqlite3
 import random
+import os.path
+
+DB_NAME = 'database.db'
 
 
 def setup_db():
-    db = sqlite3.connect('100hackerfragen.db')
+    db = sqlite3.connect(DB_NAME)
     c = db.cursor()
     c.execute('''
         CREATE TABLE fragen (
@@ -24,7 +27,7 @@ def setup_db():
 
 def db(func):
     def func_wrapper(*args, **kw):
-        db = sqlite3.connect('100hackerfragen.db')
+        db = sqlite3.connect(DB_NAME)
         c = db.cursor()
         res = func(c, *args, **kw)
         db.commit()
@@ -36,6 +39,7 @@ def db(func):
 @db
 def add_frage(c, frage):
     c.execute('INSERT INTO fragen (frage, downvotes) VALUES (?, 0)', (frage,))
+    return c.lastrowid
 
 @db
 def add_downvote(c, frage_id):
@@ -149,6 +153,11 @@ def len_fragen(c):
     return c.fetchone()[0]
 
 @db
+def clear_db(c):
+    c.execute("DELETE FROM fragen")
+    c.execute("DELETE FROM antworten")
+
+@db
 def len_antworten(c):
     return c.execute("SELECT count(*) from antworten").fetchone()[0]
 
@@ -191,4 +200,28 @@ def normalized_antworten(frage_id):
     return ants
 
 
-print("Hello. We currently have {} questions and {} answers.".format(len_fragen(), len_antworten()))
+if not os.path.isfile(DB_NAME):
+    print("DB does not exist, creating.")
+    setup_db()
+
+    importfiles = os.listdir('./import')
+
+    if importfiles:
+        print("{} Import files found. Clearing DB and read them.".format(len(importfiles)))
+        clear_db()
+        for fn in importfiles:
+            with open(os.path.join('import', fn), 'r') as importfile:
+                data = importfile.read().splitlines()
+                question = data[0]
+                frage_id = add_frage(question)
+                answers = data[1:]
+                for answer in answers:
+                    answer = answer.strip()
+                    if not answer: 
+                        continue
+                    num = int(answer[:answer.find(',')])
+                    answertxt = answer[answer.find(',')+1:]
+                    for x in range(num):
+                        add_antwort(frage_id, answertxt)
+                set_ready(frage_id)
+        print("Hello. We currently have {} questions and {} answers.".format(len_fragen(), len_antworten()))
