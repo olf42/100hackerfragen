@@ -48,14 +48,7 @@ XDATA = """  ###     ###
 """.splitlines()
 
 
-MEMES = []
-
-for dirname, dirnames, filenames in os.walk('./memes'):
-    if dirname.startswith('./memes/'):
-        if filenames:
-            MEMES.append(dirname[-1])
-
-print(MEMES)
+MEMES = ['1', '2', '3', '4', '5', '6']
 
 def buzz(side, silent=False):
     if side == 'A':
