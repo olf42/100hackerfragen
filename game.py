@@ -17,6 +17,8 @@ K_o = 269  # -
 K_s = 9 # tab
 K_x = 256 # 0 
 K_y = 271 # enter
+K_num_dot = 266 # numpad .
+K_num_plus = 270 # numpad +
 
 # don't let windows ui scale setting affect pygame screen content
 try:
@@ -319,7 +321,7 @@ def main():
             if event.type == TIMERTICK:
                 check_for_message(game)
             if event.type == KEYDOWN:
-                if event.key == 266: #np .
+                if event.key == K_num_dot:
                     play_sound('sounds/intro.wav')
                 if event.key == K_q:
                     return
@@ -366,14 +368,14 @@ def main():
                     game.team_on_turn_answered_wrong()
                 if event.key == K_y:
                     play_sound('sounds/fail.wav')
-                if event.key == 263: 
+                if event.key == 263: # 1 
                     prepare_round(1, game)
-                if event.key == 264: 
+                if event.key == 264: # 2
                     prepare_round(2, game)
-                if event.key == 265: 
+                if event.key == 265: # 3
                     prepare_round(3, game)
 
-                if event.key == 270: # np +
+                if event.key == K_num_plus:
                     game.finish_round()
 
 
@@ -461,19 +463,7 @@ Keys:
 
   Game conrols:
 
-    a ... Left Buzzer
-    s ... Left Buzzer - silent
-    b ... Right Buzzer
-    o ... Right Buzzer - silent
-    r ... Reset Buzzer
-
-    1,2,3 ... Init round
-
-    0 ... Finish round
-
-    x ... wrong answer for last buzzed team
-    y ... wrong answer without displaying "x" 
-
+    # xxx document correct keys
     q ... quit
     f ... toggle fullscreen
 
