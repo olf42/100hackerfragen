@@ -49,10 +49,12 @@ If there is no database.db found, the data from all *.txt files inside the impor
 
 Example:
 
-```Was war dein erster Heimcomputer?
+```
+Was war dein erster Heimcomputer?
 23,C64
 17,Amiga 500
-3,Atari ST```
+3,Atari ST
+```
 
 > Remember deleting your database.db is required if you change the content of your import-directory!
 
