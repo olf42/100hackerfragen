@@ -1,4 +1,6 @@
-<form action="/" method="GET">
+<form action="/edit" method="GET">
+
+<a href="/">&laquo; back to list</a>
 <h1>{{ frage }}</h1>
 <input type="hidden" name="processed_frage_id" value="{{ frage_id }}" />
 <input type="text" name="new_antwort" value="" />
@@ -17,7 +19,7 @@
 
 <hr />
 
-<label for="fertig">FERTIG?</label> <input id="fertig" type="checkbox" name="finished" value="yeah" />
+<label for="fertig">FERTIG?</label> <input id="fertig" type="checkbox" name="finished" value="yeah" {{ fertig }}/>
 <br/>
 
 <input type="submit" />
