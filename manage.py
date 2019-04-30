@@ -110,9 +110,21 @@ def get_frage_by_id(c, id):
     return
 
 @db
+def get_ready_state_by_id(c, id):
+    c.execute("SELECT status FROM fragen WHERE id=(?)", (id,))
+    res = c.fetchone()
+    if res:
+        return res
+    return
+
+@db
+def list_fragen(c):
+    c.execute("SELECT * FROM fragen")
+    return c.fetchall()
+
+@db
 def get_ready_fragen(c):
-    c.execute("SELECT id, frage FROM fragen WHERE status='ready'")
-    
+    c.execute("SELECT id, frage FROM fragen WHERE status='ready'")    
     return c.fetchall()
 
 @db
@@ -130,6 +142,11 @@ def update_antwort(c, id, new_antwort):
 @db
 def set_ready(c, id):
     q = '''UPDATE fragen SET status="ready" WHERE id=(?)'''
+    c.execute(q, (id,))
+
+@db
+def unset_ready(c, id):
+    q = '''UPDATE fragen SET status=NULL WHERE id=(?)'''
     c.execute(q, (id,))
 
 @db
