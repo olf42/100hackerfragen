@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, make_response
-from manage import get_frage, set_ready, add_antwort, add_frage, add_downvote, get_frage_by_id, get_finished_frage, normalized_antworten, update_antwort
+from manage import get_frage, set_ready, unset_ready, add_antwort, add_frage, get_ready_state_by_id,\
+    add_downvote, list_fragen, get_frage_by_id, get_finished_frage, normalized_antworten, update_antwort
 from config import APPROOT
 
 app = Flask("100hackerfragen-verwalter")
@@ -48,6 +49,15 @@ def reveal():
 
 
 @app.route('/')
+def list():
+    out = []
+    for frage in list_fragen():
+        print (frage)
+        out.append('<a href="/edit?frage_id={}">{}</a><br/>'.format(frage[0], frage[1]))
+    return ('\n'.join(out))
+
+
+@app.route('/edit')
 def index():
     data = to_dict(request.args)
     if 'new_antwort' in data:
@@ -56,12 +66,10 @@ def index():
             for b_id in eval(a_id):
                 update_antwort(b_id, data['new_antwort'])
 
-    if 'finished' in data:
-        set_ready(data['processed_frage_id'])
-
-
     if 'frage_id' in request.args:
         frage = get_frage_by_id(data['frage_id'])
+    elif 'processed_frage_id' in data:
+        frage = get_frage_by_id(data['processed_frage_id'])    
     else:
         frage = get_finished_frage()
 
@@ -71,11 +79,19 @@ def index():
     frage_id = frage[0]
     frage = frage[1]
 
+    if 'finished' in data:
+        set_ready(frage_id)
+        fertig = "checked"
+    else:
+        unset_ready(frage_id)
+        fertig = ""
+
     ants = normalized_antworten(frage_id)
 
     return render_template(
         'admin.html', 
         frage=frage,
+        fertig=fertig,
         frage_id=frage_id,
         antworten=ants,
         approot=APPROOT)
