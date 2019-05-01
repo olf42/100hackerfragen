@@ -70,7 +70,7 @@ To simply run the webserver on your local host, do this:
 FLASK_APP=fragenfragen-web.py bin/flask run
 ```
 
-Then point a browser to http://localhost:5000 where you can answer all "open" questions (questions with < 100 answers, and not set to "ready" via fragenverwalter).
+Then point a browser to http://localhost:5000 where people can answer all "open" questions (questions with < 100 answers, and not set to "ready" via fragenverwalter), and add new questions.
 
 Users are also able to downvote questions, which no longer get displayed after there are 3 downvotes are reached (every answer inbetween will cancel one downvote!).
 
