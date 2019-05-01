@@ -11,14 +11,15 @@ from multiprocessing import Process
 from gameweb import app
 import ctypes
 
-K_a = 267  # /
-K_b = 268  # *    
-K_o = 269  # -    
-K_s = 9 # tab
-K_x = 256 # 0 
-K_y = 271 # enter
-K_num_dot = 266 # numpad .
-K_num_plus = 270 # numpad +
+#overrides for ludwigs numpad design 
+#K_a = 267  # /
+#K_b = 268  # *    
+#K_o = 269  # -    
+#K_s = 9 # tab
+#K_x = 256 # 0 
+#K_y = 271 # enter
+#K_p = 266 # numpad .
+#K_f = 270 # numpad +
 
 # don't let windows ui scale setting affect pygame screen content
 try:
@@ -197,7 +198,7 @@ TIMERTICK = USEREVENT+2
 REVEAL_EFFECT_1 = pygame.mixer.Sound('sounds/reveal.wav')
 REVEAL_EFFECT_2 = pygame.mixer.Sound('sounds/reveal2.wav')
 
-NP_NUMS = list(range(257,263))
+NP_NUMS = list(range(52,57))
 
 screen = pygame.display.set_mode((1920, 1080))#, pygame.FULLSCREEN)
 pygame.mouse.set_visible(False)
@@ -321,11 +322,11 @@ def main():
             if event.type == TIMERTICK:
                 check_for_message(game)
             if event.type == KEYDOWN:
-                if event.key == K_num_dot:
+                if event.key == K_p:
                     play_sound('sounds/intro.wav')
                 if event.key == K_q:
                     return
-                if event.key == K_f:
+                if event.key == K_F11:
                     if pygame.display.get_driver()=='x11':
                         pygame.display.toggle_fullscreen()
                     else:
@@ -368,14 +369,14 @@ def main():
                     game.team_on_turn_answered_wrong()
                 if event.key == K_y:
                     play_sound('sounds/fail.wav')
-                if event.key == 263: # 1 
+                if event.key == K_1: # 1 
                     prepare_round(1, game)
-                if event.key == 264: # 2
+                if event.key == K_2: # 2
                     prepare_round(2, game)
-                if event.key == 265: # 3
+                if event.key == K_3: # 3
                     prepare_round(3, game)
 
-                if event.key == K_num_plus:
+                if event.key == K_f:
                     game.finish_round()
 
 
@@ -387,7 +388,7 @@ def main():
                     prev = screen.copy()
                     play_sound('sounds/wat.wav')
                     show_image('images/wat.jpg', GRAYSCALE)
-                if event.key == K_p:
+                if event.key == K_t:
                     prev = screen.copy()
                     play_sound('sounds/modem.wav')
                     show_image('images/pesthoernchen.jpg')
@@ -450,22 +451,35 @@ def main():
                             show_image(imgfile, GRAYSCALE)
                 print(event.key)
             if event.type == KEYUP:
-                if event.key in [K_n,K_l, K_k, K_d, K_w, K_p, K_v, K_m, K_c] + NP_NUMS:
+                if event.key in [K_n,K_l, K_k, K_d, K_w, K_t, K_v, K_m, K_c] + NP_NUMS:
                     screen.blit(prev, (0,0))
                     pygame.display.flip()
                     pygame.mixer.fadeout(300)
 
-#print("""
-"""
+print("""
 WELCOME TO 100HACKERFRAGEN SCREEN
 
 Keys:
 
   Game conrols:
 
-    # xxx document correct keys
+    f ... Finish round
+    p ... Play intro music (don't press twice or fix the bug!)
+    
+    1-3 start round 1-3
+
+    a ... Buzzer team A
+    b ... Buzzer team B
+    s ... silent Buzzer team A
+    o ... silent Buzzer team B
+
+    Backspace ... reset buzzer state
+
+    x ... team on turn answered wrong
+    y ... play fail sound
+
     q ... quit
-    f ... toggle fullscreen
+    F11 ... toggle fullscreen
 
 
   Memes (Press and hold):
@@ -473,20 +487,20 @@ Keys:
     d ... ccc
     w ... WAT
     c ... CYBER
-    p ... BTX
+    t ... BTX
     v ... putin
     m ... merkel
     k ... facepalm
     l ... lol
     n ... nyancat
 
+  Custom memes (Press and hold):
+
+    4-9 ... meme in directory memes/1 - memes/6
+    """)
 
 
 
 
-    """
-
-
-
-
-if __name__ == '__main__': main()
+if __name__ == '__main__':
+    main()
