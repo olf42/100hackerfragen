@@ -94,5 +94,76 @@ Also choose which questions appear in the game control later, by setting them to
 
 ## Play the game
 
-XXX
+
+To play the game, first start the gameweb.py application to control display of questions and answers.
+
+```bash
+FLASK_APP=gameweb.py bin/flask run
+```
+
+Point your browser to http://localhost:5000 and select question and then the answers which should be revealed.
+
+To access the tool from another device, run flask with `-h 0.0.0.0` parameter so that it listens on any IP (or set the correct ip which the tool should listen on). Then use http://<ip_or_host_of_your_machine>:5000 to access it.
+
+
+Next, start the game by running:
+
+```bash
+bin/pythom game.py
+```
+
+Use the following keys to control it:
+
+> f ... Finish round
+> p ... Play intro music (don't press twice or fix the bug!)
+> 
+> 1-3 start round 1-3
+>
+> a ... Buzzer team A
+> b ... Buzzer team B
+> s ... silent Buzzer team A
+> o ... silent Buzzer team B
+>
+> Backspace ... reset buzzer state
+>
+> x ... team on turn answered wrong
+> y ... play fail sound
+
+> q ... quit
+> F11 ... toggle fullscreen
+>
+> Memes (Press and hold):
+>
+> d ... ccc
+> w ... WAT
+> c ... CYBER
+> t ... BTX
+> v ... putin
+> m ... merkel
+> k ... facepalm
+> l ... lol
+> n ... nyancat
+>
+> 4-9 ... Custom memes 1-6
+
+
+## Troubleshooting
+
+If you run out of luck and something goes wrong, quit the game (using q), and edit points.txt, first Line contains score of team a and second line of team b.
+Then start the game again. Score should be properly set.
+
+
+## Customizing
+
+You can place custom memes in the "memes" directory in subdirectories 1-6.
+Play them while in game with keys 4 to 9.
+
+You could also replace the integrated memes with new image and sound files. They are stored in the images/ and sounds/ directory.
+
+## TODO
+
+* Use plugin-system for memes with config file to choose which are activted and map to keys.
+* Use config for all keys. Provide example for "Buzzertisch" device.
+* Better stlye for gameweb.py app (improve usability on phones).
+* Provide way to log rounds, set scores, maybe "undo" via gameweb.py.
 
