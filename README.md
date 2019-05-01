@@ -76,9 +76,7 @@ Users are also able to downvote questions, which no longer get displayed after t
 
 ### Manage your gathered data.
 
-At some point you may want to clean up the data. Use the 
-
-Runs a webserver with a small application which allows to gather new questions and answers from the public.
+At some point you may want to clean up the data. The included fragen-verwalter.py webapp helps you with that.
 
 You can start it with:
 
@@ -86,7 +84,7 @@ You can start it with:
 FLASK_APP=fragen-verwalter.py bin/flask run
 ```
 
-Pointing your browser to http://localhost:5000 will display a list of all questions. Clicking on then opens the editor where you can merge questions by filling in the new question text on top and choose which questions to merge with.
+Pointing your browser to http://localhost:5000 will display a list of all questions. Clicking on them opens the editor where you can merge questions by filling in the new question text on top and choose which questions to merge with.
 
 You can not use this to add new answers.
 
