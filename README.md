@@ -112,38 +112,39 @@ bin/pythom game.py
 
 Use the following keys to control it:
 
-> f ... Finish round
-> p ... Play intro music (don't press twice or fix the bug!)
-> 
-> 1-3 start round 1-3
->
-> a ... Buzzer team A
-> b ... Buzzer team B
-> s ... silent Buzzer team A
-> o ... silent Buzzer team B
->
-> Backspace ... reset buzzer state
->
-> x ... team on turn answered wrong
-> y ... play fail sound
+```
+f ... Finish round
+p ... Play intro music (don't press twice or fix the bug!)
 
-> q ... quit
-> F11 ... toggle fullscreen
->
-> Memes (Press and hold):
->
-> d ... ccc
-> w ... WAT
-> c ... CYBER
-> t ... BTX
-> v ... putin
-> m ... merkel
-> k ... facepalm
-> l ... lol
-> n ... nyancat
->
-> 4-9 ... Custom memes 1-6
+1-3 start round 1-3
 
+a ... Buzzer team A
+b ... Buzzer team B
+s ... silent Buzzer team A
+o ... silent Buzzer team B
+
+Backspace ... reset buzzer state
+
+x ... team on turn answered wrong
+y ... play fail sound
+ 
+q ... quit
+F11 ... toggle fullscreen
+
+Memes (Press and hold):
+
+d ... ccc
+w ... WAT
+c ... CYBER
+t ... BTX
+v ... putin
+m ... merkel
+k ... facepalm
+l ... lol
+n ... nyancat
+
+4-9 ... Custom memes 1-6
+```
 
 ## Troubleshooting
 
