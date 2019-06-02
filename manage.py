@@ -2,7 +2,8 @@ import sqlite3
 import random
 import os.path
 
-DB_NAME = 'database.db'
+from config import DB_PATH
+DB_NAME = DB_PATH
 
 
 def setup_db():

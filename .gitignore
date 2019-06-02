@@ -9,3 +9,5 @@ config.py
 flask_session
 etc
 pip-selfcheck.json
+database/database.db
+database.db
