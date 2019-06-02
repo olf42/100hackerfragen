@@ -218,13 +218,13 @@ def normalized_antworten(frage_id):
     return ants
 
 
-if not os.path.isfile(DB_NAME) and IMPORT_FROM_FILES:
+if not os.path.isfile(DB_NAME):
     print("DB does not exist, creating.")
     setup_db()
 
     importfiles = os.listdir('./import')
 
-    if importfiles:
+    if importfiles and IMPORT_FROM_FILES:
         print("{} Import files found. Clearing DB and read them.".format(len(importfiles)))
         clear_db()
         for fn in importfiles:

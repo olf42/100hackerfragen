@@ -1,13 +1,4 @@
-bin
-include
-lib
-local
-__pycache__
-share
-config.py
-100hackerfragen.db
-flask_session
-etc
-pip-selfcheck.json
-database/database.db
-database.db
+100hackerfragen/database/100hackerfragen.db
+build/*
+*__pycache__*
+100hackerfragen/flask_session

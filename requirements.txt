@@ -1,5 +1,0 @@
-pygame
-pillow
-youtube-dl
-flask
-flask_session

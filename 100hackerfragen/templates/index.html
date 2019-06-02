@@ -21,14 +21,16 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarResponsive">
           <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
+            <li class="nav-item active">
               <a class="nav-link" href="{{approot}}">Fragen beantworten
+                <span class="sr-only">(current)</span>
               </a>
             </li>
-            <li class="nav-item active">
-              <a class="nav-link" href="{{approot}}add">Frage hinzufügen</a>
-              <span class="sr-only">(current)</span>
+            {% if usq %}
+            <li class="nav-item">
+                <a class="nav-link" href="{{approot}}add">Frage hinzufügen</a>
             </li>
+            {% endif %}
           </ul>
         </div>
       </div>
@@ -38,19 +40,23 @@
     <div class="container">
       <div class="row">
         <div class="col-lg-12 text-center">
-          {% if submitted %}
-          <div class="alert alert-success" role="alert">
-            <strong>Danke!</strong> Du kannst gerne noch weitere Fragen vorschlagen!
+          {% if no_more_questions %}
+          <div class="alert alert-danger" role="alert">
+            <strong>Ups.</strong> Leider gibt es keine Fragen mehr.
           </div>
-          {% endif %}
-          <h1 class="mt-5">100 Hacker*innen haben wir gefragt...</h1>
-	      <form action="{{approot}}add" method="get">
-          <label for="frage">Versuche eine Frage zu stellen, die möglichst viele typische Hackspace besuchende beantworten können. Bitte keine Ja/Nein bzw. "dies oder das" Fragen - die funktionieren nicht für das Spiel. Sei kreativ! #tuwat</label>
+          {% else %}
+          <h1 class="mt-5">{{ frage['num'] }} {{ salutation }} haben wir gefragt...</h1>
+          <p class="lead">{{ frage['frage'] }}</p>
+	      <form action="{{approot}}" method="get">
 			  <div class="form-group">
-			    <input name="question" type="text" class="form-control" id="frage" placeholder="..." autofocus>
+			    <label for="antwort">Deine Antwort</label>
+			    <input type="hidden" name="frage_id" value="{{ frage['id'] }}">
+			    <input name="answer" type="text" class="form-control" id="antwort" placeholder="..." autofocus>
 			  </div>
 			  <button type="submit" class="btn btn-primary">Abschicken</button>
+			  <button type="submit" class="btn btn-primary" name="nope" value="nope">nicht beantworten, nächste Frage</button>
           </form>
+          {% endif %}
 
         </div>
       </div>

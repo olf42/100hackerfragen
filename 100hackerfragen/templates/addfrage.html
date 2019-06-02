@@ -21,13 +21,13 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarResponsive">
           <ul class="navbar-nav ml-auto">
-            <li class="nav-item active">
+            <li class="nav-item">
               <a class="nav-link" href="{{approot}}">Fragen beantworten
-                <span class="sr-only">(current)</span>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item active">
               <a class="nav-link" href="{{approot}}add">Frage hinzufügen</a>
+              <span class="sr-only">(current)</span>
             </li>
           </ul>
         </div>
@@ -38,24 +38,19 @@
     <div class="container">
       <div class="row">
         <div class="col-lg-12 text-center">
-          {% if no_more_questions %}
-          <div class="alert alert-danger" role="alert">
-            <strong>Ups.</strong> Leider gibt es keine Fragen mehr. <a href="{{approot}}add">Du kannst Fragen hinzufügen.</a>
+          {% if submitted %}
+          <div class="alert alert-success" role="alert">
+            <strong>Danke!</strong> Du kannst gerne noch weitere Fragen vorschlagen!
           </div>
-          {% else %}
-          <h1 class="mt-5">{{ frage['num'] }} Hacker*innen haben wir gefragt...</h1>
-          <p class="lead">{{ frage['frage'] }}</p>
-	      <form action="{{approot}}" method="get">
+          {% endif %}
+          <h1 class="mt-5">100 Hacker*innen haben wir gefragt...</h1>
+	      <form action="{{approot}}add" method="get">
+          <label for="frage">Versuche eine Frage zu stellen, die möglichst viele typische Hackspace besuchende beantworten können. Bitte keine Ja/Nein bzw. "dies oder das" Fragen - die funktionieren nicht für das Spiel. Sei kreativ! #tuwat</label>
 			  <div class="form-group">
-			    <label for="antwort">Deine Antwort</label>
-			    <input type="hidden" name="frage_id" value="{{ frage['id'] }}">
-			    <input name="answer" type="text" class="form-control" id="antwort" placeholder="..." autofocus>
+			    <input name="question" type="text" class="form-control" id="frage" placeholder="..." autofocus>
 			  </div>
 			  <button type="submit" class="btn btn-primary">Abschicken</button>
-			  <button type="submit" class="btn btn-primary" name="nope" value="nope">nicht beantworten, nächste Frage</button>
-			  <button type="submit" class="btn btn-secondary" name="shit" value="poop">WTF / -1 / Downvote</button>
           </form>
-          {% endif %}
 
         </div>
       </div>
