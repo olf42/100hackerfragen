@@ -2,7 +2,7 @@ import sqlite3
 import random
 import os.path
 
-from config import DB_PATH
+from config import DB_PATH, IMPORT_FROM_FILES
 DB_NAME = DB_PATH
 
 
@@ -218,7 +218,7 @@ def normalized_antworten(frage_id):
     return ants
 
 
-if not os.path.isfile(DB_NAME):
+if not os.path.isfile(DB_NAME) and IMPORT_FROM_FILES:
     print("DB does not exist, creating.")
     setup_db()
 
