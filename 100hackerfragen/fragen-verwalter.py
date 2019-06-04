@@ -52,9 +52,11 @@ def reveal():
 def list():
     out = []
     for frage in list_fragen():
-        print (frage)
-        out.append('<a href="/edit?frage_id={}">{}</a><br/>'.format(frage[0], frage[1]))
-    return ('\n'.join(out))
+        out.append([frage[0], frage[1]])
+    return render_template(
+        "fragenliste.html",
+        fragen=out
+    )
 
 
 @app.route('/edit')
