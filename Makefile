@@ -13,3 +13,11 @@ build-fragenfragen: ## Build the fragenfragen docker image
 	cp deploy/fragenfragen/* $(BFF)
 	cp -r requirements_fragenfragen.txt $(BFF)
 	cd $(BFF); docker build -t "olf42:100hackerfragen_fragenfragen" .
+
+.PHONY: run-fragenfragen
+run-fragenfragen: build-fragenfragen
+	docker run \
+		-p 5000:5000 \
+		--rm \
+		--name fragenfragen \
+		olf42:100hackerfragen_fragenfragen
