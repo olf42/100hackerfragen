@@ -29,10 +29,10 @@ def get_database(
             )
             db.clear()
             for fn in importfiles:
-                with open(Path(import_path) / fn, "r") as importfile:
+                with open(fn, "r") as importfile:
                     data = importfile.read().splitlines()
                     question = data[0]
-                    frage_id = add_frage(question)
+                    frage_id = db.add_frage(question)
                     answers = data[1:]
                     for answer in answers:
                         answer = answer.strip()
@@ -41,11 +41,11 @@ def get_database(
                         num = int(answer[: answer.find(",")])
                         answertxt = answer[answer.find(",") + 1 :]
                         for x in range(num):
-                            add_antwort(frage_id, answertxt)
-                    set_ready(frage_id)
+                            db.add_antwort(frage_id, answertxt)
+                    db.set_ready(frage_id)
             print(
                 "Hello. We currently have {} questions and {} answers.".format(
-                    len_fragen(), len_antworten()
+                    db.len_fragen(), db.len_antworten()
                 )
             )
 

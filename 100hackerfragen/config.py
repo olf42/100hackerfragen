@@ -4,7 +4,7 @@ APPROOT = '/'
 
 DB_PATH = Path(".") / "database" / "100hackerfragen.db"
 IMPORT_PATH = Path("question_import")
-IMPORT_FROM_FILES = False
+IMPORT_FROM_FILES = True
 IMPORT_PATH = Path("import")
 
 # The following toggle allows users to add their own questions 
